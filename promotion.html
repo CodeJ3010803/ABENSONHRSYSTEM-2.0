@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abenson HR - Promotion</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-logo">abenson <span>HR</span></div>
+        <a href="home.html" class="nav-link">← Back to Dashboard</a>
+    </header>
+
+    <main class="main-content">
+        <div class="page-title">
+            <h2>Promotion Workflow</h2>
+            <p>Manage employee promotions and scoring.</p>
+        </div>
+
+        <div class="workflow-grid">
+            <section class="workflow-card">
+                <div class="card-header">
+                    <h3>1. Load Candidate Data</h3>
+                </div>
+                <form id="data-lookup-form">
+                    <div class="input-group">
+                        <label>Upload Database (echo 1.xlsx)</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📂</span>
+                            <input type="file" id="excel-upload" accept=".xlsx" style="padding-left: 45px;">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Employee ID</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🆔</span>
+                            <input type="text" id="employee-id" placeholder="e.g. 70, 111" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">Load Details</button>
+                </form>
+            </section>
+
+            <section class="workflow-card">
+                <div class="card-header">
+                    <h3>2. Candidate Details</h3>
+                </div>
+                <div id="employee-data" class="data-display-area">
+                    <p style="text-align: center; color: #999; padding: 20px;">
+                        No data loaded. Please upload a file and search.
+                    </p>
+                </div>
+            </section>
+
+            <section class="workflow-card">
+                <div class="card-header">
+                    <h3>3. Generate Documents</h3>
+                </div>
+                <div class="action-buttons">
+                    <button type="button" id="generate-summary" class="btn-submit btn-secondary" disabled>
+                        📄 Generate Summary (.txt)
+                    </button>
+                    <button type="button" id="generate-panel-sheet" class="btn-submit" disabled>
+                        📊 Generate Panel Sheet (.xlsx)
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

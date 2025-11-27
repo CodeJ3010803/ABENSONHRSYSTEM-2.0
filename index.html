@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abenson HR - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main class="login-container">
+        <section class="login-hero">
+            <div class="hero-content">
+                <h1 class="brand-logo">abenson</h1>
+                <h2 style=" color: var(--color-accent);">HR MANAGEMENT<br>SYSTEM</h2>
+                <p>Empowering our people, driving our success.</p>
+                <div class="hero-circles">
+                    <div class="circle c1"></div>
+                    <div class="circle c2"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-form-wrapper">
+            <form id="login-form" class="login-form">
+                <div class="form-header">
+                    <h2>Welcome Back!</h2>
+                    <p>Please enter your details to sign in.</p>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password">👁️</button>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <label class="remember-me">
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="#" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn-submit">Sign In</button>
+
+                <p class="signup-link">
+                    Don't have an account? <a href="register.html">Sign up</a>
+                </p>
+            </form>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

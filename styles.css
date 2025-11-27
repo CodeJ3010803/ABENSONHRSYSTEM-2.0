@@ -1,0 +1,201 @@
+/* =========================================
+   1. RESET & GLOBAL VARIABLES
+   ========================================= */
+:root {
+    --color-primary: #004AAD; /* Abenson Blue */
+    --color-primary-dark: #003680;
+    --color-accent: #FFC107; /* Abenson Yellow */
+    --color-text-main: #333333;
+    --color-text-muted: #666666;
+    --color-border: #E0E0E0;
+    --color-bg-body: #F4F7FA;
+    --color-bg-input: #F9F9F9;
+    --shadow-soft: 0 10px 30px rgba(0, 74, 173, 0.1);
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --font-main: 'Poppins', sans-serif;
+    --radius-main: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-main);
+    background: var(--color-bg-body);
+    color: var(--color-text-main);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+a { text-decoration: none; color: inherit; transition: 0.3s; }
+ul { list-style: none; }
+
+/* =========================================
+   2. AUTH PAGES (Login/Register)
+   ========================================= */
+.login-container { display: flex; height: 100vh; width: 100%; background: white; }
+
+/* Left Side Hero */
+.login-hero {
+    flex: 1;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #0072ff 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.hero-content { z-index: 2; text-align: left; padding: 60px; max-width: 600px; }
+.brand-logo { font-size: 2.5rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 20px; color: white; text-transform: lowercase; }
+.hero-content h2 { font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; font-weight: 600; }
+.hero-content p { font-size: 1.1rem; opacity: 0.9; font-weight: 300; }
+.hero-circles .circle { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.1); }
+.c1 { width: 300px; height: 300px; top: -50px; right: -50px; }
+.c2 { width: 500px; height: 500px; bottom: -100px; left: -100px; }
+
+/* Right Side Form */
+.login-form-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: white; }
+.login-form { width: 100%; max-width: 420px; padding: 40px; }
+.form-header { margin-bottom: 40px; text-align: center; }
+.form-header h2 { font-size: 2rem; color: var(--color-text-main); margin-bottom: 10px; }
+.form-header p { color: var(--color-text-muted); font-size: 0.95rem; }
+
+/* Input Styles */
+.input-group { margin-bottom: 25px; }
+.input-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--color-text-main); font-size: 0.9rem; }
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-wrapper input, .input-wrapper select {
+    width: 100%; padding: 15px 15px 15px 45px;
+    border: 1px solid var(--color-border); border-radius: var(--radius-main);
+    background: var(--color-bg-input); font-family: var(--font-main); font-size: 1rem;
+    transition: all 0.3s ease;
+}
+.input-wrapper input:focus { outline: none; border-color: var(--color-primary); background: white; box-shadow: 0 0 0 4px rgba(0, 74, 173, 0.1); }
+.input-icon { position: absolute; left: 15px; color: var(--color-text-muted); font-size: 1.1rem; }
+.toggle-password { position: absolute; right: 15px; background: none; border: none; cursor: pointer; color: var(--color-text-muted); font-size: 1.1rem; }
+
+/* Buttons */
+.btn-submit {
+    width: 100%; padding: 15px; background: var(--color-primary); color: white;
+    border: none; border-radius: var(--radius-main); font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: 0.3s; box-shadow: var(--shadow-soft); display: block; text-align: center; margin: 20px auto !important; 
+
+}
+.btn-submit:hover { background: var(--color-primary-dark); transform: translateY(-2px); }
+.btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+.form-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; font-size: 0.9rem; }
+.signup-link { text-align: center; margin-top: 25px; font-size: 0.9rem; color: var(--color-text-muted); }
+.signup-link a { color: var(--color-primary); font-weight: 600; }
+
+/* =========================================
+   3. INTERNAL PAGES (Header & Layout)
+   ========================================= */
+.app-header {
+    background: white;
+    padding: 15px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: var(--shadow-soft);
+    position: sticky; top: 0; z-index: 100;
+}
+.header-logo { font-size: 1.8rem; font-weight: 700; color: var(--color-primary); letter-spacing: -0.5px; }
+.header-logo span { color: var(--color-accent); }
+.nav-link { color: var(--color-text-muted); font-weight: 500; font-size: 0.95rem; }
+.nav-link:hover { color: var(--color-primary); }
+
+.main-content {
+    max-width: 1200px; margin: 40px auto; padding: 0 20px;
+    min-height: 650px;
+}
+
+/* =========================================
+   4. HOME DASHBOARD
+   ========================================= */
+.dashboard-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px; margin-top: 40px;
+}
+
+.process-card {
+    background: white; border-radius: 20px; padding: 40px;
+    text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--shadow-card); position: relative; overflow: hidden;
+    border: 1px solid white;
+}
+.process-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-soft); border-color: var(--color-primary); }
+
+.card-icon { font-size: 4rem; margin-bottom: 20px; display: block; }
+.process-card h2 { font-size: 1.8rem; color: var(--color-primary); margin-bottom: 15px; }
+.process-card p { color: var(--color-text-muted); margin-bottom: 30px; font-size: 1rem; }
+
+/* =========================================
+   5. WORKFLOW PAGES (Reg/Promo)
+   ========================================= */
+.page-title { text-align: center; margin-bottom: 40px; }
+.page-title h2 { font-size: 2.2rem; color: var(--color-text-main); }
+.page-title p { color: var(--color-text-muted); }
+
+.workflow-grid { display: grid; grid-template-columns: 1fr; gap: 30px; max-width: 800px; margin: 0 auto; }
+
+/* Section Cards */
+.workflow-card { background: white; padding: 30px; border-radius: 16px; box-shadow: var(--shadow-card); }
+.card-header { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--color-border); }
+.card-header h3 { font-size: 1.2rem; color: var(--color-primary); font-weight: 600; }
+
+/* Employee Data Display */
+.data-display-area { min-height: 100px; }
+.employee-details-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    background: var(--color-bg-input); padding: 20px; border-radius: var(--radius-main);
+}
+.detail-item label { display: block; font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.detail-item span { font-size: 1.1rem; font-weight: 600; color: var(--color-text-main); }
+
+.success-badge {
+    background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px;
+    margin-top: 15px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;
+}
+
+/* Action Buttons Grid */
+.action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+.btn-secondary { background: #28a745; } /* Green for Summary */
+.btn-secondary:hover { background: #218838; }
+
+/* Popup Styles (Reused) */
+.popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.popup-content { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .login-container { flex-direction: column; }
+    .login-hero { display: none; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .employee-details-grid { grid-template-columns: 1fr; }
+    .action-buttons { grid-template-columns: 1fr; }
+}
+
+
+/* ADD THIS NEW CLASS FOR SIDE-BY-SIDE INPUTS */
+.input-row {
+    display: flex;
+    gap: 15px;
+}
+.input-row .input-group {
+    flex: 1; /* Make them equal width */
+}
+
+/* Mobile adjustment */
+@media (max-width: 768px) {
+    .input-row { flex-direction: column; gap: 0; }
+}
+
+.banner{
+    height: 105px;
+    width: 80%;
+    background-color: var(--color-primary);
+    display: block;    
+    margin-left: 10%;
+    margin-right: 10%;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+}

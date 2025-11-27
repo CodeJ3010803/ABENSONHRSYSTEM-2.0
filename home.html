@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abenson HR - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-logo">abenson <span>HR</span></div>
+        <a href="index.html" class="nav-link" onclick="sessionStorage.clear()">Logout ➜</a>
+    </header>
+
+    <main class="main-content">
+        <div class="page-title">
+            <h2 id="welcome-message">Welcome Back!</h2>
+            <p>Select a workflow to begin.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="process-card">
+                <span class="card-icon">👔</span>
+                <h2>Regularization</h2>
+                <p>Process employee regularizations, generate summaries, and create panel sheets.</p>
+                <a href="regularization.html" class="btn-submit">Start Process</a>
+            </div>
+
+            <div class="process-card">
+                <span class="card-icon">🚀</span>
+                <h2>Promotion</h2>
+                <p>Manage employee promotions, scoring, and documentation generation.</p>
+                <a href="promotion.html" class="btn-submit" style="background: var(--color-accent); color: #333;">Start Process</a>
+            </div>
+        </div>
+    </main>
+
+    <div class="banner">
+    </div>
+   
+    <script src="script.js"></script>
+</body>
+</html>

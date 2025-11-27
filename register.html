@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abenson HR - Register</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main class="login-container">
+        <section class="login-hero">
+            <div class="hero-content">
+                <h1 class="brand-logo">abenson</h1>
+                <h2 style=" color: var(--color-accent)" >JOIN THE<br>TEAM</h2>
+                <p>Create your account to access the HR Portal.</p>
+                <div class="hero-circles">
+                    <div class="circle c1"></div>
+                    <div class="circle c2"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-form-wrapper">
+            <form id="register-form" class="login-form">
+                <div class="form-header">
+                    <h2>Create Account</h2>
+                    <p>Fill in the details below to get started.</p>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="first-name">First Name</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">👤</span>
+                            <input type="text" id="first-name" placeholder="Juan" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="last-name">Last Name</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">👤</span>
+                            <input type="text" id="last-name" placeholder="Dela Cruz" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" placeholder="Create a password" required>
+                        <button type="button" class="toggle-password">👁️</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔐</span>
+                        <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Register</button>
+
+                <p class="signup-link">
+                    Already have an account? <a href="index.html">Sign in</a>
+                </p>
+            </form>
+
+            <div id="registration-popup" class="popup-overlay" style="display:none;">
+                <div class="popup-content">
+                    <div style="font-size: 3rem; color: #28a745; margin-bottom: 10px;">&#10004;</div>
+                    <h3>Success!</h3>
+                    <p>Your account has been created.</p>
+                    <button id="popup-ok-btn" class="btn-submit" style="margin: 20px auto; width: auto; padding: 10px 30px;">Continue to Login</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
