@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abenson HR - Promotion</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <header class="app-header">
         <div class="header-logo">abenson <span>HR</span></div>
@@ -44,8 +47,10 @@
             </section>
 
             <section class="workflow-card">
-                <div class="card-header">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h3>2. Candidate Details</h3>
+                    <button type="button" id="clear-all-btn" class="btn-clear-all" style="display: none;">Clear
+                        All</button>
                 </div>
                 <div id="employee-data" class="data-display-area">
                     <p style="text-align: center; color: #999; padding: 20px;">
@@ -63,7 +68,7 @@
                         📄 Generate Summary (.txt)
                     </button>
                     <button type="button" id="generate-panel-sheet" class="btn-submit" disabled>
-                        📊 Generate Panel Sheet (.xlsx)
+                        📊 Generate Panel Sheets (.xlsx) <span id="selection-counter" class="selection-counter"></span>
                     </button>
                 </div>
             </section>
@@ -73,5 +78,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script src="script.js"></script>
+    <script src="multi-employee.js"></script>
 </body>
+
 </html>
