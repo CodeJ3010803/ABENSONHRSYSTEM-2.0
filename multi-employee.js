@@ -223,14 +223,14 @@ function updateButtonStates() {
         if (isReg) {
             if (globalEduData) {
                 summaryBtn.disabled = false;
-                summaryBtn.textContent = "📄 Generate Summary (.doc)";
+                summaryBtn.textContent = selectedCount > 1 ? `📄 Generate Summary (${selectedCount} employees)` : "📄 Generate Summary (.doc)";
             } else {
                 summaryBtn.disabled = true;
                 summaryBtn.textContent = "Upload Edu File to Enable";
             }
         } else {
             summaryBtn.disabled = false;
-            summaryBtn.textContent = "📄 Generate Summary (.doc)";
+            summaryBtn.textContent = selectedCount > 1 ? `📄 Generate Summary (${selectedCount} employees)` : "📄 Generate Summary (.doc)";
         }
     } else if (summaryBtn) {
         summaryBtn.disabled = true;
@@ -257,6 +257,180 @@ if (panelSheetBtn) {
         }
         generateMultiEmployeePanelSheets(selectedEmployees);
     });
+}
+
+// Override the Generate Summary button to handle multiple employees
+const originalSummaryBtn = document.getElementById('generate-summary');
+if (originalSummaryBtn) {
+    // Clone to remove existing event listeners
+    const newSummaryBtn = originalSummaryBtn.cloneNode(true);
+    originalSummaryBtn.parentNode.replaceChild(newSummaryBtn, originalSummaryBtn);
+
+    newSummaryBtn.addEventListener('click', () => {
+        const selectedEmployees = getSelectedEmployees();
+
+        if (selectedEmployees.length === 0) {
+            alert("Please select at least one employee.");
+            return;
+        }
+
+        if (selectedEmployees.length === 1) {
+            // Single employee - use regular generation from script.js
+            currentEmployeeData = selectedEmployees[0];
+            if (currentEmployeeData.isReg) {
+                generateRegularizationWordDoc(currentEmployeeData);
+            } else {
+                generatePromotionWordDoc(currentEmployeeData);
+            }
+        } else {
+            // Multiple employees - generate stacked summaries
+            generateStackedSummary(selectedEmployees);
+        }
+    });
+}
+
+// Generate stacked summary for multiple employees (one file, each with full headers)
+function generateStackedSummary(employees) {
+    if (!employees || employees.length === 0) {
+        alert("No employees selected!");
+        return;
+    }
+
+    const isReg = employees[0].isReg;
+
+    // Generate employee sections - each with full header
+    const employeeSections = employees.map((emp, index) => {
+        const panelDate = new Date().toLocaleDateString();
+
+        return `
+        ${index > 0 ? '<div style="page-break-before: always;"></div>' : ''}
+        
+        <div class="line-1">ABENSON GROUP OF COMPANIES</div>
+        <div class="line-2">Human Resource Department</div>
+        <div class="space-17">&nbsp;</div>
+        <div class="line-4">${isReg ? 'REGULARIZATION' : 'PROMOTION'} SUMMARY</div>
+        <div class="space-20">&nbsp;</div>
+
+        <table class="info-table">
+            <tr><td><span class="label-normal">Name:</span> &nbsp;&nbsp; <span class="data-bold">${emp.name}</span></td><td class="right"><span class="label-normal">On-Board Date:</span> &nbsp;&nbsp; <span class="data-bold">${emp.hired}</span></td></tr>
+            <tr><td><span class="label-normal">Position:</span> &nbsp;&nbsp; <span class="data-bold">${emp.pos}</span></td><td class="right"><span class="label-normal">Panel Interview:</span> &nbsp;&nbsp; <span class="data-bold">${panelDate}</span></td></tr>
+            <tr><td colspan="2"><span class="label-normal">Branch/Department:</span> &nbsp;&nbsp; <span class="data-bold">${emp.branch} - ${emp.dept}</span></td></tr>
+            <tr><td colspan="2"><span class="label-normal">Immediate Supervisor:</span> &nbsp;&nbsp; <span class="data-bold">${emp.mentor}</span></td></tr>
+        </table>
+
+        <div class="space-10">&nbsp;</div>
+
+        <table class="forms-table" align="center">
+            <tr class="forms-header"><td>${isReg ? 'REGULARIZATION FORMS' : 'PROMOTION FORMS'}</td><td>REMARKS</td></tr>
+            <tr><td class="col-title">Recommendation & Essay</td><td class="col-remark">See attached files</td></tr>
+            <tr><td class="col-title">Individual Score Card</td><td class="col-remark"></td></tr>
+            <tr><td class="col-title">Personal Discipline Score [PDS]</td><td class="col-remark"></td></tr>
+            <tr><td class="col-title">Internal Customer Rating</td><td class="col-remark"></td></tr>
+            ${isReg ? `
+            <tr><td class="col-title">Medical Result</td><td class="col-remark">Fit to work</td></tr>
+            <tr><td class="col-title">Background Investigation</td><td class="col-remark">Cleared</td></tr>
+            <tr>
+                <td class="col-title" style="vertical-align: top; padding-top: 10px;">Transcript of Records</td>
+                <td class="tor-cell">
+                    <div class="tor-content">
+                        ${emp.tor.school}<br>${emp.tor.major}<br>${emp.tor.years}
+                    </div>
+                </td>
+            </tr>
+            ` : `
+            <tr><td class="col-title">BSC KPI Scorecard</td><td class="col-remark"></td></tr>
+            <tr><td class="col-title">PDS Attendance</td><td class="col-remark"></td></tr>
+            <tr><td class="col-title">Last Promotion Date</td><td class="col-remark">${emp.lastPromoDate}</td></tr>
+            `}
+        </table>
+
+        <div class="space-16">&nbsp;</div>
+        <div class="feedback-title">360 Feedback Summary</div>
+        <br>
+        <table class="feedback-table" align="center">
+            <tr class="feedback-header"><td></td><td>RATING</td></tr>
+            <tr><td class="col-competency">Self-Awareness</td><td class="col-rating"></td></tr>
+            <tr><td class="col-competency">Drive for results</td><td class="col-rating"></td></tr>
+            <tr><td class="col-competency">Communication</td><td class="col-rating"></td></tr>
+            <tr><td class="col-competency">Leadership</td><td class="col-rating"></td></tr>
+            <tr><td class="col-competency">Teamwork</td><td class="col-rating"></td></tr>
+            <tr><td style="font-weight:bold; font-style:italic;">Average score (3.75 passing rate)</td><td class="col-rating" style="font-weight:bold">${emp.feedback.avg}</td></tr>
+        </table>
+
+        <br>
+
+        <div style="width: 6.5in; margin: auto;">
+            <div class="comments-title">Comments/Remarks</div>
+            <div class="na-text">· N/A</div>
+            <div class="space-11">&nbsp;</div>
+            <div style="font-weight:bold; font-size:12pt;">Prepared by:</div>
+            <div class="space-11">&nbsp;</div>
+            <div class="space-11">&nbsp;</div>
+            <div style="border-bottom: 1px solid black; width: 200px;"></div>
+            <div class="comments-title">Julie Mae Sasutona</div>
+            <div style="font-weight:bold; margin-top:5px; font-size:12pt;">HR Staff</div>
+        </div>
+        `;
+    }).join('');
+
+    const content = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+        <meta charset="utf-8">
+        <xml>
+            <w:WordDocument>
+                <w:View>Print</w:View>
+                <w:Zoom>100</w:Zoom>
+                <w:DoNotOptimizeForBrowser/>
+            </w:WordDocument>
+        </xml>
+        <style>
+            @page { size: 8.5in 14in; margin: 1in; mso-page-orientation: portrait; }
+            body { font-family: 'Calibri', sans-serif; }
+            .line-1 { font-size: 14pt; font-weight: bold; text-align: center; margin: 0; padding: 0; }
+            .line-2 { font-size: 13pt; text-align: center; margin: 0; padding: 0; }
+            .line-4 { font-size: 17pt; font-weight: bold; text-align: center; margin: 0; padding: 0; }
+            .space-17 { font-size: 17pt; line-height: 17pt; }
+            .space-20 { font-size: 20pt; line-height: 20pt; }
+            .space-10 { font-size: 10pt; line-height: 10pt; }
+            .space-16 { font-size: 16pt; line-height: 16pt; }
+            .space-14 { font-size: 14pt; line-height: 14pt; } 
+            .space-11 { font-size: 11pt; line-height: 11pt; } 
+            .space-13 { font-size: 13pt; line-height: 13pt; } 
+            .info-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: 12pt; }
+            .info-table td { padding: 2px 0; vertical-align: top; border: none; }
+            .data-bold { font-weight: bold; }
+            .label-normal { font-weight: normal; }
+            .right { text-align: right; }
+            .forms-table { width: 6.1in; border-collapse: collapse; margin-left: auto; margin-right: auto; font-size: 11pt; }
+            .forms-table td { border: 1px solid black; padding: 2px; vertical-align: middle; height: 0.25in; }
+            .forms-header td { font-weight: bold; text-align: center; background-color: #E7E6E6; padding: 4px; }
+            .col-remark { text-align: center; }
+            .col-title { font-weight: bold; }
+            .tor-cell { padding: 0 !important; height: 100%; text-align: center; }
+            .tor-content { padding: 2px; font-size: 11pt; line-height: 1.1; }
+            .feedback-title { text-align: center; font-style: italic; font-weight: bold; font-size: 16pt; margin: 0; }
+            .feedback-table { width: 3.7in; border-collapse: collapse; margin-left: auto; margin-right: auto; font-size: 11pt; }
+            .feedback-table td { border: 1px solid black; padding: 2px; vertical-align: middle; height: 0.2in; }
+            .feedback-header td { font-weight: bold; text-align: center; background-color: #E7E6E6; padding: 4px; }
+            .col-rating { text-align: center; font-weight: bold; } 
+            .col-competency { font-weight: bold; } 
+            .comments-title { font-size: 14pt; font-weight: bold; }
+            .na-text { font-size: 11pt; font-family: 'Calibri', sans-serif; }
+        </style>
+    </head>
+    <body>
+        ${employeeSections}
+    </body>
+    </html>
+    `;
+
+    const filePrefix = isReg ? "Regularization" : "Promotion";
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `${filePrefix}_Summary_${employees.length}employees_${dateStr}.doc`;
+
+    saveDoc(content, filename);
+    alert(`Successfully generated summary for ${employees.length} employee(s)!`);
 }
 
 // Generate panel sheets for multiple employees
