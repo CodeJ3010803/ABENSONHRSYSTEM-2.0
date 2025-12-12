@@ -369,6 +369,14 @@ function generateStackedSummary(employees) {
             <div style="border-bottom: 1px solid black; width: 200px;"></div>
             <div class="comments-title">Julie Mae Sasutona</div>
             <div style="font-weight:bold; margin-top:5px; font-size:12pt;">HR Staff</div>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            
         </div>
         `;
     }).join('');
