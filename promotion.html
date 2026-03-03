@@ -12,63 +12,71 @@
 
 <body>
     <header class="app-header">
-        <div class="header-logo">abenson <span>HR</span></div>
-        <a href="home.html" class="nav-link">← Back to Dashboard</a>
+        <div class="header-logo">abenson <span>Workflow</span></div>
+        <nav>
+            <a href="home.html" class="nav-link active">Dashboard</a>
+            <a href="index.html" class="nav-link" onclick="sessionStorage.clear()">Sign Out</a>
+        </nav>
     </header>
 
     <main class="main-content">
-        <div class="page-title">
-            <h2>Promotion Workflow</h2>
-            <p>Manage employee promotions and scoring.</p>
-        </div>
+        <section class="page-title">
+            <h2>Career Promotion Workflow</h2>
+            <p>Manage candidate assessments, scoring protocols, and formal promotion documentation.</p>
+        </section>
 
         <div class="workflow-grid">
+            <!-- 1. DATA LOADING CARD -->
             <section class="workflow-card">
                 <div class="card-header">
-                    <h3>1. Load Candidate Data</h3>
+                    <h3>📂 1. Candidate Scouting</h3>
                 </div>
                 <form id="data-lookup-form">
                     <div class="input-group">
-                        <label>Upload Database (echo 1.xlsx)</label>
+                        <label>Candidate Master Database</label>
                         <div class="input-wrapper">
-                            <span class="input-icon">📂</span>
-                            <input type="file" id="excel-upload" accept=".xlsx" style="padding-left: 45px;">
+                            <span class="input-icon">📘</span>
+                            <input type="file" id="excel-upload" accept=".xlsx" required>
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>Employee ID</label>
+                        <label>Candidate Identifier</label>
                         <div class="input-wrapper">
                             <span class="input-icon">🆔</span>
-                            <input type="text" id="employee-id" placeholder="e.g. 70, 111" required>
+                            <input type="text" id="employee-id" placeholder="Enter ID (e.g. 111)" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn-submit">Load Details</button>
+                    <button type="submit" class="btn-submit">Process Candidate Profile</button>
                 </form>
             </section>
 
+            <!-- 2. DETAILS CARD -->
             <section class="workflow-card">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>2. Candidate Details</h3>
-                    <button type="button" id="clear-all-btn" class="btn-clear-all" style="display: none;">Clear
+                <div class="card-header">
+                    <h3>👤 2. Candidate Evaluation</h3>
+                    <button type="button" id="clear-all-btn" class="btn-clear-all"
+                        style="display: none; background: var(--color-danger); color: white; padding: 4px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Clear
                         All</button>
                 </div>
                 <div id="employee-data" class="data-display-area">
-                    <p style="text-align: center; color: #999; padding: 20px;">
-                        No data loaded. Please upload a file and search.
-                    </p>
+                    <div style="text-align: center; color: var(--color-text-light); padding: 40px;">
+                        <span style="font-size: 3rem; display: block; margin-bottom: 20px; opacity: 0.2;">📈</span>
+                        No candidate data processed. Initialize by uploading a valid dataset.
+                    </div>
                 </div>
             </section>
 
+            <!-- 3. ACTIONS CARD -->
             <section class="workflow-card">
                 <div class="card-header">
-                    <h3>3. Generate Documents</h3>
+                    <h3>⚡ 3. Document Action Suite</h3>
                 </div>
                 <div class="action-buttons">
                     <button type="button" id="generate-summary" class="btn-submit btn-secondary" disabled>
                         📄 Generate Summary (.txt)
                     </button>
                     <button type="button" id="generate-panel-sheet" class="btn-submit" disabled>
-                        📊 Generate Panel Sheets (.xlsx) <span id="selection-counter" class="selection-counter"></span>
+                        📊 Compile Panel Sheets (.xlsx) <span id="selection-counter" class="selection-counter"></span>
                     </button>
                 </div>
             </section>

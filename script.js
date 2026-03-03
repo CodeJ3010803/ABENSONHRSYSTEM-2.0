@@ -1,52 +1,82 @@
 // ====================================================================
-// 1. GLOBAL UTILITIES
+// 1. GLOBAL UTILITIES & UI FEEDBACK
 // ====================================================================
 
-// GLOBAL DATA STORAGE (To persist uploads across searches)
+// GLOBAL DATA STORAGE
 let globalMasterData = null;
 let globalEduData = null;
 
+const UI = {
+    showLoading: (btn) => {
+        const originalText = btn.innerHTML;
+        btn.setAttribute('data-original-text', originalText);
+        btn.innerHTML = '<span class="loader"></span> Processing...';
+        btn.disabled = true;
+    },
+    hideLoading: (btn) => {
+        btn.innerHTML = btn.getAttribute('data-original-text');
+        btn.disabled = false;
+    },
+    notify: (message, type = 'info') => {
+        // Simple alert replacement or enhanced feedback
+        console.log(`[${type.toUpperCase()}] ${message}`);
+        if (type === 'error') alert(`❌ Error: ${message}`);
+        else if (type === 'success') console.log("Success Notification");
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Password Toggle
+    // Password Toggle Enhancement
     document.querySelectorAll('.toggle-password').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const input = this.parentElement.querySelector('input');
             if (input) {
-                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                input.setAttribute('type', type);
-                this.textContent = type === 'password' ? '👁️' : '🙈';
+                const isPassword = input.getAttribute('type') === 'password';
+                input.setAttribute('type', isPassword ? 'text' : 'password');
+                this.innerHTML = isPassword ? '�' : '�️';
+                this.classList.toggle('active', !isPassword);
             }
         });
     });
 
-    // Registration Popup
+    // Registration Logic
     const regForm = document.getElementById('register-form');
     if (regForm) {
         regForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const firstName = document.getElementById('first-name').value;
-            const lastName = document.getElementById('last-name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirm = document.getElementById('confirm-password').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            UI.showLoading(btn);
 
-            if (password !== confirm) {
-                alert("Passwords do not match!");
-                return;
-            }
+            setTimeout(() => { // Simulate network delay
+                const firstName = document.getElementById('first-name').value;
+                const lastName = document.getElementById('last-name').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirm = document.getElementById('confirm-password').value;
 
-            const users = JSON.parse(localStorage.getItem('abenson_hr_users') || '[]');
-            if (users.find(u => u.email === email)) {
-                alert("This email is already registered.");
-                return;
-            }
+                if (password !== confirm) {
+                    UI.notify("Passwords do not match!", "error");
+                    UI.hideLoading(btn);
+                    return;
+                }
 
-            users.push({ firstName, lastName, email, password });
-            localStorage.setItem('abenson_hr_users', JSON.stringify(users));
-            document.getElementById('registration-popup').style.display = 'flex';
+                const users = JSON.parse(localStorage.getItem('abenson_hr_users') || '[]');
+                if (users.find(u => u.email === email)) {
+                    UI.notify("This email is already associated with an account.", "error");
+                    UI.hideLoading(btn);
+                    return;
+                }
+
+                users.push({ firstName, lastName, email, password });
+                localStorage.setItem('abenson_hr_users', JSON.stringify(users));
+
+                UI.hideLoading(btn);
+                const popup = document.getElementById('registration-popup');
+                if (popup) popup.style.display = 'flex';
+            }, 800);
         });
 
-        document.getElementById('popup-ok-btn').addEventListener('click', () => {
+        document.getElementById('popup-ok-btn')?.addEventListener('click', () => {
             window.location.href = 'index.html';
         });
     }
@@ -56,166 +86,142 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const users = JSON.parse(localStorage.getItem('abenson_hr_users') || '[]');
-            const validUser = users.find(u => u.email === email && u.password === password);
+            const btn = e.target.querySelector('button[type="submit"]');
+            UI.showLoading(btn);
 
-            if (validUser) {
-                sessionStorage.setItem('currentUser', JSON.stringify(validUser));
-                window.location.href = 'home.html';
-            } else {
-                alert("Invalid email or password.");
-            }
+            setTimeout(() => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const users = JSON.parse(localStorage.getItem('abenson_hr_users') || '[]');
+                const validUser = users.find(u => u.email === email && u.password === password);
+
+                if (validUser) {
+                    sessionStorage.setItem('currentUser', JSON.stringify(validUser));
+                    window.location.href = 'home.html';
+                } else {
+                    UI.notify("Invalid credentials. Please try again.", "error");
+                    UI.hideLoading(btn);
+                }
+            }, 600);
         });
     }
 
-    // Home Page Personalization
+    // Dynamic Welcome Message
     const welcomeMsg = document.getElementById('welcome-message');
     if (welcomeMsg) {
         const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
         if (currentUser && currentUser.firstName) {
-            welcomeMsg.textContent = `Welcome Back, ${currentUser.firstName}!`;
+            const hour = new Date().getHours();
+            let greeting = "Good Morning";
+            if (hour >= 12) greeting = "Good Afternoon";
+            if (hour >= 18) greeting = "Good Evening";
+            welcomeMsg.textContent = `${greeting}, ${currentUser.firstName}`;
         }
     }
 });
 
 // ====================================================================
-// 2. DATABASE LOADING & MAPPING (PERSISTENT)
+// 2. DATA PROCESSING ENGINE
 // ====================================================================
 let currentEmployeeData = null;
 
 const dataForm = document.getElementById('data-lookup-form');
 if (dataForm) {
-    dataForm.addEventListener('submit', async function(e) {
+    dataForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+        const btn = e.target.querySelector('button[type="submit"]');
+        UI.showLoading(btn);
+
         const isReg = document.title.includes('Regularization');
         const mainFileInput = document.getElementById('excel-upload');
         const eduFileInput = document.getElementById('edu-upload');
         const idInput = document.getElementById('employee-id').value.trim();
 
-        // --- 1. LOAD MASTER DATA ---
-        if (mainFileInput.files.length > 0) {
-            try {
+        try {
+            // --- 1. LOAD MASTER DATA ---
+            if (mainFileInput.files.length > 0) {
                 globalMasterData = await readExcelFile(mainFileInput.files[0]);
-                console.log("Master DB Loaded/Updated");
-            } catch (err) {
-                alert("Error reading Master File.");
-                return;
+            } else if (!globalMasterData) {
+                throw new Error("Master database file is required.");
             }
-        } else if (!globalMasterData) {
-            alert("Please upload the Master Database file first.");
-            return;
-        }
 
-        // --- 2. LOAD EDUCATION DATA (OPTIONAL) ---
-        if (eduFileInput && eduFileInput.files.length > 0) {
-            try {
+            // --- 2. LOAD EDUCATION DATA (OPTIONAL) ---
+            if (eduFileInput && eduFileInput.files.length > 0) {
                 globalEduData = await readExcelFile(eduFileInput.files[0]);
-                console.log("Education DB Loaded/Updated");
-            } catch (err) {
-                console.warn("Error reading Edu File, skipping.");
             }
-        } 
 
-        // --- 3. SEARCH EMPLOYEE ---
-        if (!idInput) {
-            alert("Please enter an Employee ID.");
-            return;
-        }
+            // --- 3. SEARCH EMPLOYEE ---
+            const emp = globalMasterData.find(row => {
+                const dbId = String(row['EmployeeNo']).trim();
+                const inputId = idInput.replace(/\D/g, '');
+                return dbId === idInput || dbId === inputId;
+            });
 
-        const emp = globalMasterData.find(row => {
-            const dbId = String(row['EmployeeNo']).trim();
-            const inputId = idInput.replace(/\D/g,''); 
-            return dbId === idInput || dbId === inputId;
-        });
+            if (!emp) throw new Error("Employee identifier not found in the current dataset.");
 
-        if (!emp) {
-            alert("Employee ID not found in loaded database.");
-            return;
-        }
-
-        // --- 4. SEARCH EDUCATION RECORD ---
-        let eduRecord = {};
-        if (globalEduData) {
-            eduRecord = globalEduData.find(row => {
-                const dbId = String(row['EMPNO']).trim().replace(/^0+/, ''); 
-                const targetId = String(emp['EmployeeNo']).trim().replace(/^0+/, '');
-                return dbId === targetId;
-            }) || {};
-        }
-
-        // --- 5. MAP DATA ---
-        currentEmployeeData = {
-            id: emp['EmployeeNo'],
-            name: (emp['EmployeeName'] || "").toUpperCase(),
-            pos: (emp['EmployeePosition'] || "").toUpperCase(),
-            dept: (emp['Department'] || "").toUpperCase(),
-            branch: (emp['WorkLocation'] || "").toUpperCase(),
-            mentor: (emp['DirectSupervisor'] || "N/A").toUpperCase(),
-            hired: formatDate(emp['Hired Date']),
-            // If Regularization page, target is REGULARIZATION. If Promotion, assume Supervisor for demo (or from another field)
-            targetPos: isReg ? 'REGULARIZATION' : 'SUPERVISOR (PROPOSED)',
-            isReg: isReg,
-            feedback: {
-                avg: emp['Feedback_Avg'] || ''
-            },
-            tor: {
-                school: (eduRecord['SCHOOL'] || "").toUpperCase(),
-                major: (eduRecord['MAJOR'] || "").toUpperCase(),
-                years: (eduRecord['STARTYEAR'] && eduRecord['ENDYEAR']) 
-                       ? `${eduRecord['STARTYEAR']} - ${eduRecord['ENDYEAR']}` 
-                       : ""
-            },
-            // Promotion Specific Data (Mocked or from DB if available)
-            lastPromoDate: "N/A" // Add logic here if column exists
-        };
-
-        // --- 6. DISPLAY DATA ---
-        const display = document.getElementById('employee-data');
-        const hasEdu = !!(globalEduData && eduRecord.SCHOOL); 
-
-        display.innerHTML = `
-            <h3>2. Employee Details</h3>
-            <div class="employee-card-details">
-                <p><strong>Name:</strong> ${currentEmployeeData.name}</p>
-                <p><strong>ID:</strong> ${currentEmployeeData.id}</p>
-                <p><strong>Current Pos:</strong> ${currentEmployeeData.pos}</p>
-                <p><strong>Target Pos:</strong> ${currentEmployeeData.targetPos}</p>
-                <p><strong>Dept/Branch:</strong> ${currentEmployeeData.branch} - ${currentEmployeeData.dept}</p>
-                <p><strong>Mentor:</strong> ${currentEmployeeData.mentor}</p>
-                <p><strong>Hired Date:</strong> ${currentEmployeeData.hired}</p>
-                ${isReg ? (hasEdu ? `<p><strong>Education:</strong> ${currentEmployeeData.tor.school}</p>` : '<p style="color:orange"><em>Education data not found.</em></p>') : ''}
-            </div>
-            <div style="margin-top:15px; padding:10px; background:#e8f5e9; border-radius:5px; color:#2e7d32; font-size:0.9em;">
-                ✓ Data Loaded Successfully
-            </div>
-        `;
-        
-        // --- BUTTON STATE LOGIC ---
-        const summaryBtn = document.getElementById('generate-summary');
-        const panelBtn = document.getElementById('generate-panel-sheet');
-
-        panelBtn.disabled = false; 
-
-        // For Regularization: Need Edu File. For Promotion: Just Master File is okay (based on previous context, or adapt as needed)
-        // Assuming Promotion Summary doesn't strictly need TOR based on image_48d619.png (it doesn't show TOR table)
-        if (isReg) {
+            // --- 4. MAP DATA ---
+            let eduRecord = {};
             if (globalEduData) {
-                summaryBtn.disabled = false;
-                summaryBtn.textContent = "Generate Summary (.doc)";
-                summaryBtn.classList.remove('btn-disabled-custom');
-            } else {
-                summaryBtn.disabled = true;
-                summaryBtn.textContent = "Upload Edu File to Enable";
-                summaryBtn.classList.add('btn-disabled-custom');
+                eduRecord = globalEduData.find(row => {
+                    const dbId = String(row['EMPNO']).trim().replace(/^0+/, '');
+                    const targetId = String(emp['EmployeeNo']).trim().replace(/^0+/, '');
+                    return dbId === targetId;
+                }) || {};
             }
-        } else {
-            // Promotion Page - Enable Summary immediately
-            summaryBtn.disabled = false;
-            summaryBtn.textContent = "Generate Summary (.doc)";
-            summaryBtn.classList.remove('btn-disabled-custom');
+
+            currentEmployeeData = {
+                id: emp['EmployeeNo'],
+                name: (emp['EmployeeName'] || "").toUpperCase(),
+                pos: (emp['EmployeePosition'] || "").toUpperCase(),
+                dept: (emp['Department'] || "").toUpperCase(),
+                branch: (emp['WorkLocation'] || "").toUpperCase(),
+                mentor: (emp['DirectSupervisor'] || "N/A").toUpperCase(),
+                hired: formatDate(emp['Hired Date']),
+                targetPos: isReg ? 'REGULARIZATION' : 'SUPERVISOR (PROPOSED)',
+                isReg: isReg,
+                feedback: { avg: emp['Feedback_Avg'] || '' },
+                tor: {
+                    school: (eduRecord['SCHOOL'] || "").toUpperCase(),
+                    major: (eduRecord['MAJOR'] || "").toUpperCase(),
+                    years: (eduRecord['STARTYEAR'] && eduRecord['ENDYEAR']) ? `${eduRecord['STARTYEAR']} - ${eduRecord['ENDYEAR']}` : ""
+                },
+                lastPromoDate: "N/A"
+            };
+
+            // --- 5. RENDER DISPLAY ---
+            const display = document.getElementById('employee-data');
+            const hasEdu = !!(globalEduData && eduRecord.SCHOOL);
+
+            display.innerHTML = `
+                <div class="employee-details-grid">
+                    <div class="detail-item"><label>Full Name</label><span>${currentEmployeeData.name}</span></div>
+                    <div class="detail-item"><label>Account ID</label><span>${currentEmployeeData.id}</span></div>
+                    <div class="detail-item"><label>Current Role</label><span>${currentEmployeeData.pos}</span></div>
+                    <div class="detail-item"><label>Target Status</label><span>${currentEmployeeData.targetPos}</span></div>
+                    <div class="detail-item"><label>Branch Location</label><span>${currentEmployeeData.branch}</span></div>
+                    <div class="detail-item"><label>Department</label><span>${currentEmployeeData.dept}</span></div>
+                    <div class="detail-item" style="grid-column: span 2;"><label>Direct Supervisor</label><span>${currentEmployeeData.mentor}</span></div>
+                </div>
+                <div class="success-badge">
+                    <span>✓</span> Data mapped and verified for documentation.
+                </div>
+            `;
+
+            // --- ENABLE ACTIONS ---
+            document.getElementById('generate-panel-sheet').disabled = false;
+            const summaryBtn = document.getElementById('generate-summary');
+
+            if (isReg) {
+                summaryBtn.disabled = !globalEduData;
+                summaryBtn.innerHTML = globalEduData ? '📄 Generate Summary (.doc)' : '⚠️ Upload Edu File for Summary';
+            } else {
+                summaryBtn.disabled = false;
+            }
+
+        } catch (err) {
+            UI.notify(err.message, "error");
+        } finally {
+            UI.hideLoading(btn);
         }
     });
 }
@@ -251,7 +257,7 @@ function formatDate(excelDate) {
 
 document.getElementById('generate-summary')?.addEventListener('click', () => {
     if (!currentEmployeeData) return;
-    
+
     if (currentEmployeeData.isReg) {
         generateRegularizationWordDoc(currentEmployeeData);
     } else {
@@ -525,8 +531,8 @@ document.getElementById('generate-panel-sheet')?.addEventListener('click', () =>
     place(ws, "A3", "Employee Name: " + emp.name, f18b);
     place(ws, "A4", "Present Position: " + emp.pos, f18b);
 
-    if(!ws['!merges']) ws['!merges'] = [];
-    ws['!merges'].push({ s: {r:3, c:5}, e: {r:3, c:7} }); 
+    if (!ws['!merges']) ws['!merges'] = [];
+    ws['!merges'].push({ s: { r: 3, c: 5 }, e: { r: 3, c: 7 } });
 
     const regText = emp.isReg ? "☑ REGULARIZATION" : "☐ REGULARIZATION";
     const promoText = emp.isReg ? "☐ PROMOTION" : "☑ PROMOTION";
@@ -543,7 +549,7 @@ document.getElementById('generate-panel-sheet')?.addEventListener('click', () =>
     place(ws, "A9", "MAJOR PARTS", headerMajorParts);
     const scale = ["Excellent", "Good", "Average", "Below Average", "Poor"];
     scale.forEach((txt, i) => {
-        const cell = XLSX.utils.encode_cell({r: 8, c: i+1});
+        const cell = XLSX.utils.encode_cell({ r: 8, c: i + 1 });
         place(ws, cell, txt, headerGray);
     });
     place(ws, "G9", "Grade", headerCyan);
@@ -551,58 +557,58 @@ document.getElementById('generate-panel-sheet')?.addEventListener('click', () =>
     place(ws, "I9", "COMMENTS/REMARKS", headerComments);
 
     const rows = [
-        {t: "Part 1. Job Knowledge Competency", type: "title", ref: "p1"},
-        {t: "▪ Demonstrates the knowledge, skills and abilities necessary to perform his/her duties and responsibilities", type: "q"},
-        {t: "▪ Demonstrate accountability and honesty in the conduct of his/her job", type: "q"},
-        {t: "▪ Completes assigned tasks efficiently and effectively", type: "q"},
-        {t: "Part 2. Quality Attitude (Values)", type: "title", ref: "p2"},
-        {t: "▪ Fit to the organization and culture", type: "q"},
-        {t: "▪ Client/Customer Focus", type: "q"},
-        {t: "▪ Ability to work and develop harmonious relationship with colleagues", type: "q"},
-        {t: "▪ Open to feedback and with positive attitude", type: "q"},
-        {t: "Part 3. Career Growth", type: "title", ref: "p3"},
-        {t: "▪ Long-term plan with company", type: "q"},
-        {t: "▪ Shows concern for career growth", type: "q"},
-        {t: "Total", type: "total"}
+        { t: "Part 1. Job Knowledge Competency", type: "title", ref: "p1" },
+        { t: "▪ Demonstrates the knowledge, skills and abilities necessary to perform his/her duties and responsibilities", type: "q" },
+        { t: "▪ Demonstrate accountability and honesty in the conduct of his/her job", type: "q" },
+        { t: "▪ Completes assigned tasks efficiently and effectively", type: "q" },
+        { t: "Part 2. Quality Attitude (Values)", type: "title", ref: "p2" },
+        { t: "▪ Fit to the organization and culture", type: "q" },
+        { t: "▪ Client/Customer Focus", type: "q" },
+        { t: "▪ Ability to work and develop harmonious relationship with colleagues", type: "q" },
+        { t: "▪ Open to feedback and with positive attitude", type: "q" },
+        { t: "Part 3. Career Growth", type: "title", ref: "p3" },
+        { t: "▪ Long-term plan with company", type: "q" },
+        { t: "▪ Shows concern for career growth", type: "q" },
+        { t: "Total", type: "total" }
     ];
 
-    let r = 9; 
+    let r = 9;
     rows.forEach((row) => {
         const rowNum = r + 1;
         if (row.type === "title") {
-             place(ws, `A${rowNum}`, row.t, { border: allBorders, font: { name: "Calibri", sz: 16, bold: true }, alignment: { wrapText: true, vertical: "center" } });
-             const count = row.ref === 'p1' ? 3 : (row.ref === 'p2' ? 4 : 2);
-             const range = `G${rowNum+1}:G${rowNum+count}`;
-             place(ws, `H${rowNum}`, {t:'n', f:`AVERAGE(${range})`}, { ...f14b, border: allBorders, alignment: { horizontal: "center" } });
-             place(ws, `G${rowNum}`, "", blueInputCell);
-             for(let c=1; c<=5; c++) place(ws, XLSX.utils.encode_cell({r, c}), "", { border: allBorders });
+            place(ws, `A${rowNum}`, row.t, { border: allBorders, font: { name: "Calibri", sz: 16, bold: true }, alignment: { wrapText: true, vertical: "center" } });
+            const count = row.ref === 'p1' ? 3 : (row.ref === 'p2' ? 4 : 2);
+            const range = `G${rowNum + 1}:G${rowNum + count}`;
+            place(ws, `H${rowNum}`, { t: 'n', f: `AVERAGE(${range})` }, { ...f14b, border: allBorders, alignment: { horizontal: "center" } });
+            place(ws, `G${rowNum}`, "", blueInputCell);
+            for (let c = 1; c <= 5; c++) place(ws, XLSX.utils.encode_cell({ r, c }), "", { border: allBorders });
         } else if (row.type === "q") {
-             place(ws, `A${rowNum}`, row.t, questionWhite);
-             [5,4,3,2,1].forEach((s, i) => {
-                 place(ws, XLSX.utils.encode_cell({r, c: i+1}), s, scoreCellStyle);
-             });
-             let currentGStyle = blueInputCell;
-             if (r === 10) currentGStyle = blueInputNoTop;    
-             if (r === 11) currentGStyle = blueInputNoBottom; 
-             if (r === 14) currentGStyle = blueInputNoTop;    
-             if (r === 16) currentGStyle = blueInputNoBottom; 
-             if (r === 19) currentGStyle = blueInputNoTop;    
-             place(ws, `G${rowNum}`, "", currentGStyle);
-             place(ws, `H${rowNum}`, "", inputCell);
-             place(ws, `I${rowNum}`, "", { border: allBorders });
+            place(ws, `A${rowNum}`, row.t, questionWhite);
+            [5, 4, 3, 2, 1].forEach((s, i) => {
+                place(ws, XLSX.utils.encode_cell({ r, c: i + 1 }), s, scoreCellStyle);
+            });
+            let currentGStyle = blueInputCell;
+            if (r === 10) currentGStyle = blueInputNoTop;
+            if (r === 11) currentGStyle = blueInputNoBottom;
+            if (r === 14) currentGStyle = blueInputNoTop;
+            if (r === 16) currentGStyle = blueInputNoBottom;
+            if (r === 19) currentGStyle = blueInputNoTop;
+            place(ws, `G${rowNum}`, "", currentGStyle);
+            place(ws, `H${rowNum}`, "", inputCell);
+            place(ws, `I${rowNum}`, "", { border: allBorders });
         } else if (row.type === "total") {
-             place(ws, `A${rowNum}`, "Total", { border: allBorders, font: { name: "Calibri", sz: 11, bold: true }, fill: { fgColor: { rgb: "E7E6E6" } } });
-             place(ws, `G${rowNum}`, "", blueInputCell);
-             place(ws, `H${rowNum}`, {t:'n', f:"SUM(H10,H14,H19)"}, { ...f14b, border: allBorders, color: { rgb: "FF0000" }, alignment: { horizontal: "center" } });
-             for(let c=1; c<=5; c++) place(ws, XLSX.utils.encode_cell({r, c}), "", { border: allBorders });
-             place(ws, `I${rowNum}`, "", { border: allBorders });
+            place(ws, `A${rowNum}`, "Total", { border: allBorders, font: { name: "Calibri", sz: 11, bold: true }, fill: { fgColor: { rgb: "E7E6E6" } } });
+            place(ws, `G${rowNum}`, "", blueInputCell);
+            place(ws, `H${rowNum}`, { t: 'n', f: "SUM(H10,H14,H19)" }, { ...f14b, border: allBorders, color: { rgb: "FF0000" }, alignment: { horizontal: "center" } });
+            for (let c = 1; c <= 5; c++) place(ws, XLSX.utils.encode_cell({ r, c }), "", { border: allBorders });
+            place(ws, `I${rowNum}`, "", { border: allBorders });
         }
         r++;
     });
 
-    ws['!merges'].push({ s: {r:9, c:8}, e: {r:12, c:8} }); 
-    ws['!merges'].push({ s: {r:13, c:8}, e: {r:17, c:8} }); 
-    ws['!merges'].push({ s: {r:18, c:8}, e: {r:20, c:8} }); 
+    ws['!merges'].push({ s: { r: 9, c: 8 }, e: { r: 12, c: 8 } });
+    ws['!merges'].push({ s: { r: 13, c: 8 }, e: { r: 17, c: 8 } });
+    ws['!merges'].push({ s: { r: 18, c: 8 }, e: { r: 20, c: 8 } });
     const sCommentBox = { border: allBorders, alignment: { vertical: "top", wrapText: true } };
     styleRange(ws, 9, 12, 8, 8, sCommentBox);
     styleRange(ws, 13, 17, 8, 8, sCommentBox);
@@ -610,8 +616,8 @@ document.getElementById('generate-panel-sheet')?.addEventListener('click', () =>
 
     const passGradeStyle = { font: { name: "Calibri", sz: 14, bold: true, italic: true }, alignment: { horizontal: "right" } };
     place(ws, "A23", "Passing grade: 12.5 -up", passGradeStyle);
-    ws['!merges'].push({ s: {r:22, c:0}, e: {r:22, c:7} }); 
-    
+    ws['!merges'].push({ s: { r: 22, c: 0 }, e: { r: 22, c: 7 } });
+
     place(ws, "A24", "Recommendation:", f14b);
     if (emp.isReg) {
         place(ws, "A25", "□ OK FOR REGULARIZATION", recommendActive);
@@ -621,12 +627,12 @@ document.getElementById('generate-panel-sheet')?.addEventListener('click', () =>
         place(ws, "A26", "□ NOT RECOMMENDED", recommendInactive);
     }
     place(ws, "A28", "Other Comments and Justification:", f14b);
-    ws['!merges'].push({ s: {r:28, c:0}, e: {r:32, c:8} }); 
-    styleRange(ws, 28, 32, 0, 8, sCommentBox); 
+    ws['!merges'].push({ s: { r: 28, c: 0 }, e: { r: 32, c: 8 } });
+    styleRange(ws, 28, 32, 0, 8, sCommentBox);
     place(ws, "A36", "Panelist's Name:", f14b);
     place(ws, "B36", "Date:", f14b);
 
-    ws['!cols'] = [{wch: 68.41}, {wch: 7.11}, {wch: 7.11}, {wch: 7.11}, {wch: 7.11}, {wch: 7.11}, {wch: 12.88}, {wch: 17.71}, {wch: 56.89}];
+    ws['!cols'] = [{ wch: 68.41 }, { wch: 7.11 }, { wch: 7.11 }, { wch: 7.11 }, { wch: 7.11 }, { wch: 7.11 }, { wch: 12.88 }, { wch: 17.71 }, { wch: 56.89 }];
     const filePrefix = emp.isReg ? "Regularization" : "Promotion";
     XLSX.utils.book_append_sheet(wb, ws, "Panel Sheet");
     XLSX.writeFile(wb, `${filePrefix}_Panel_${emp.id}.xlsx`);
@@ -640,8 +646,8 @@ function place(ws, ref, val, style) {
 function styleRange(ws, rStart, rEnd, cStart, cEnd, style) {
     for (let r = rStart; r <= rEnd; r++) {
         for (let c = cStart; c <= cEnd; c++) {
-            const cellRef = XLSX.utils.encode_cell({r, c});
-            if (!ws[cellRef]) ws[cellRef] = { v: "", t: "s" }; 
+            const cellRef = XLSX.utils.encode_cell({ r, c });
+            if (!ws[cellRef]) ws[cellRef] = { v: "", t: "s" };
             ws[cellRef].s = style;
         }
     }

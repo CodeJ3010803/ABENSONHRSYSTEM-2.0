@@ -10,29 +10,25 @@ let currentPreviewEmployee = null; // Employee being previewed
 // Show employee preview with "Add to List" button
 function showEmployeePreview(employeeData) {
     currentPreviewEmployee = employeeData;
-    currentEmployeeData = employeeData; // For backward compatibility
 
     const display = document.getElementById('employee-data');
     if (!display) return;
 
-    const isReg = employeeData.isReg;
-
     display.innerHTML = `
         <div class="employee-preview-card">
-            <h4>📋 Preview Employee Details</h4>
-            <div class="employee-card-details">
-                <p><strong>Name:</strong> ${employeeData.name}</p>
-                <p><strong>ID:</strong> ${employeeData.id}</p>
-                <p><strong>Current Position:</strong> ${employeeData.pos}</p>
-                <p><strong>Target Position:</strong> ${employeeData.targetPos}</p>
-                <p><strong>Department:</strong> ${employeeData.dept}</p>
-                <p><strong>Branch:</strong> ${employeeData.branch}</p>
-                <p><strong>Mentor:</strong> ${employeeData.mentor}</p>
-                <p><strong>Hired Date:</strong> ${employeeData.hired}</p>
-                ${isReg && employeeData.tor.school ? `<p><strong>Education:</strong> ${employeeData.tor.school}</p>` : ''}
+            <h4 style="margin-bottom: 20px; color: var(--color-primary); display: flex; align-items: center; gap: 8px;">
+                <span>🔍</span> Candidate Verification
+            </h4>
+            <div class="employee-details-grid">
+                <div class="detail-item"><label>Full Name</label><span>${employeeData.name}</span></div>
+                <div class="detail-item"><label>Account ID</label><span>${employeeData.id}</span></div>
+                <div class="detail-item"><label>Current Role</label><span>${employeeData.pos}</span></div>
+                <div class="detail-item"><label>Target Status</label><span>${employeeData.targetPos}</span></div>
+                <div class="detail-item"><label>Location</label><span>${employeeData.branch}</span></div>
+                <div class="detail-item"><label>Department</label><span>${employeeData.dept}</span></div>
             </div>
-            <button type="button" class="btn-add-employee" onclick="addPreviewedEmployee()">
-                ✓ Add to List
+            <button type="button" class="btn-add-employee" onclick="addPreviewedEmployee()" style="margin-top: 25px; width: 100%; justify-content: center;">
+                ✓ Stage Candidate for Processing
             </button>
         </div>
     `;
@@ -52,23 +48,18 @@ function addPreviewedEmployee() {
     if (idInput) idInput.value = '';
 }
 
-// Update button states for preview mode
+// Update button states for preview mode (Match script.js style)
 function updateButtonStatesForPreview() {
     const summaryBtn = document.getElementById('generate-summary');
     if (!summaryBtn || !currentPreviewEmployee) return;
 
     const isReg = currentPreviewEmployee.isReg;
     if (isReg) {
-        if (globalEduData) {
-            summaryBtn.disabled = false;
-            summaryBtn.textContent = "📄 Generate Summary (.doc)";
-        } else {
-            summaryBtn.disabled = true;
-            summaryBtn.textContent = "Upload Edu File to Enable";
-        }
+        summaryBtn.disabled = !globalEduData;
+        summaryBtn.innerHTML = globalEduData ? '📄 Generate Summary (.doc)' : '⚠️ Upload Edu File for Summary';
     } else {
         summaryBtn.disabled = false;
-        summaryBtn.textContent = "📄 Generate Summary (.doc)";
+        summaryBtn.innerHTML = '📄 Generate Summary (.doc)';
     }
 }
 
@@ -78,7 +69,7 @@ function addEmployeeToList(employeeData) {
 
     if (existingIndex !== -1) {
         employeeDataList[existingIndex] = { ...employeeData, selected: true };
-        alert(`Employee ${employeeData.name} updated in the list.`);
+        UI.notify(`Candidate profile ${employeeData.name} updated.`, "info");
     } else {
         employeeDataList.push({ ...employeeData, selected: true });
     }
@@ -104,7 +95,7 @@ function removeEmployeeFromList(employeeId) {
 function clearAllEmployees() {
     if (employeeDataList.length === 0) return;
 
-    if (confirm('Are you sure you want to clear all loaded employees?')) {
+    if (confirm('Are you sure you want to clear all loaded candidates?')) {
         employeeDataList = [];
         showEmptyState();
         updateButtonStates();
@@ -116,9 +107,10 @@ function showEmptyState() {
     const display = document.getElementById('employee-data');
     if (display) {
         display.innerHTML = `
-            <p style="text-align: center; color: #999; padding: 20px;">
-                No data loaded. Please upload a file and search.
-            </p>
+            <div style="text-align: center; color: var(--color-text-light); padding: 40px;">
+                <span style="font-size: 3rem; display: block; margin-bottom: 20px; opacity: 0.2;">🔍</span>
+                No active session data. Upload files and search above to begin mapping.
+            </div>
         `;
     }
 
@@ -156,7 +148,7 @@ function renderEmployeeList() {
     if (clearBtn) clearBtn.style.display = 'block';
 
     const listHTML = employeeDataList.map(emp => `
-        <div class="employee-list-item ${emp.selected ? 'selected' : ''}" data-emp-id="${emp.id}">
+        <div class="employee-list-item ${emp.selected ? 'selected' : ''}" data-emp-id="${emp.id}" onclick="event.target.tagName !== 'INPUT' && event.target.tagName !== 'BUTTON' && toggleEmployeeSelection('${emp.id}')">
             <div class="employee-checkbox-wrapper">
                 <input type="checkbox" 
                        id="emp-check-${emp.id}" 
@@ -164,15 +156,14 @@ function renderEmployeeList() {
                        onchange="toggleEmployeeSelection('${emp.id}')">
             </div>
             <div class="employee-info-compact">
-                <h4>${emp.name} (ID: ${emp.id})</h4>
+                <h4>${emp.name} <span>ID: ${emp.id}</span></h4>
                 <div class="info-row">
-                    <div class="info-item"><strong>Position:</strong> ${emp.pos}</div>
-                    <div class="info-item"><strong>Department:</strong> ${emp.dept}</div>
-                    <div class="info-item"><strong>Branch:</strong> ${emp.branch}</div>
-                    <div class="info-item"><strong>Hired:</strong> ${emp.hired}</div>
+                    <div class="info-item"><strong>Role:</strong> ${emp.pos}</div>
+                    <div class="info-item"><strong>Dept:</strong> ${emp.dept}</div>
+                    <div class="info-item"><strong>Location:</strong> ${emp.branch}</div>
                 </div>
             </div>
-            <button class="btn-remove-employee" onclick="removeEmployeeFromList('${emp.id}')">
+            <button class="btn-remove-employee" onclick="removeEmployeeFromList('${emp.id}')" title="Remove">
                 ✕
             </button>
         </div>
@@ -182,8 +173,8 @@ function renderEmployeeList() {
         <div class="employee-list-container">
             ${listHTML}
         </div>
-        <div style="margin-top:15px; padding:10px; background:#e8f5e9; border-radius:5px; color:#2e7d32; font-size:0.9em;">
-            ✓ ${employeeDataList.length} employee(s) in list
+        <div class="success-badge" style="margin-top: 20px;">
+            <span>✓</span> ${employeeDataList.length} candidate(s) staged for processing.
         </div>
     `;
 
@@ -252,7 +243,7 @@ if (panelSheetBtn) {
     newPanelBtn.addEventListener('click', () => {
         const selectedEmployees = getSelectedEmployees();
         if (selectedEmployees.length === 0) {
-            alert("Please select at least one employee.");
+            UI.notify("Please select at least one employee.", "error");
             return;
         }
         generateMultiEmployeePanelSheets(selectedEmployees);
@@ -270,7 +261,7 @@ if (originalSummaryBtn) {
         const selectedEmployees = getSelectedEmployees();
 
         if (selectedEmployees.length === 0) {
-            alert("Please select at least one employee.");
+            UI.notify("Please select at least one employee.", "error");
             return;
         }
 
@@ -369,14 +360,6 @@ function generateStackedSummary(employees) {
             <div style="border-bottom: 1px solid black; width: 200px;"></div>
             <div class="comments-title">Julie Mae Sasutona</div>
             <div style="font-weight:bold; margin-top:5px; font-size:12pt;">HR Staff</div>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            
         </div>
         `;
     }).join('');
@@ -438,7 +421,7 @@ function generateStackedSummary(employees) {
     const filename = `${filePrefix}_Summary_${employees.length}employees_${dateStr}.doc`;
 
     saveDoc(content, filename);
-    alert(`Successfully generated summary for ${employees.length} employee(s)!`);
+    UI.notify(`Successfully generated summaries for ${employees.length} candidates.`, "success");
 }
 
 // Generate panel sheets for multiple employees
@@ -458,7 +441,7 @@ function generateMultiEmployeePanelSheets(employees) {
     // Explicitly set bookType to ensure proper .xlsx download
     XLSX.writeFile(wb, filename, { bookType: 'xlsx' });
 
-    alert(`Successfully generated ${employees.length} panel sheet(s)!`);
+    UI.notify(`Successfully generated ${employees.length} panel sheet(s)!`, "success");
 }
 
 // Create a single panel sheet (same as original logic)
@@ -632,11 +615,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 globalMasterData = await readExcelFile(mainFileInput.files[0]);
                 console.log("Master DB Loaded");
             } catch (err) {
-                alert("Error reading Master File.");
+                UI.notify("Error reading Master File.", "error");
                 return;
             }
         } else if (!globalMasterData) {
-            alert("Please upload the Master Database file first.");
+            UI.notify("Please upload the Master Database file first.", "error");
             return;
         }
 
@@ -652,7 +635,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Search Employee
         if (!idInput) {
-            alert("Please enter an Employee ID.");
+            UI.notify("Please enter an Employee ID.", "error");
             return;
         }
 
@@ -663,7 +646,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (!emp) {
-            alert("Employee ID not found in loaded database.");
+            UI.notify("Employee ID not found in loaded database.", "error");
             return;
         }
 
