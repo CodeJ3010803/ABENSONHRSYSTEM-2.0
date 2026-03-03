@@ -464,7 +464,7 @@ function createPanelSheet(emp) {
     const headerComments = { fill: { fgColor: { rgb: "E7E6E6" } }, border: allBorders, font: { name: "Calibri", sz: 14, bold: true }, alignment: { horizontal: "center", vertical: "center" } };
     const processActiveNoBorder = { fill: { fgColor: { rgb: "FFFF00" } }, font: { name: "Calibri", sz: 18, bold: true }, alignment: { horizontal: "left", vertical: "center" } };
     const processInactiveNoBorder = { font: { name: "Calibri", sz: 18 }, alignment: { horizontal: "left", vertical: "center" } };
-    const recommendActive = { fill: { fgColor: { rgb: "FFFF00" } }, font: { name: "Calibri", sz: 14, bold: true } };
+    const recommendActive = { font: { name: "Calibri", sz: 14, bold: true } };
     const recommendInactive = { font: { name: "Calibri", sz: 14, bold: true } };
     const inputCell = { border: allBorders, font: { name: "Calibri", sz: 14 }, alignment: { horizontal: "center", vertical: "center" } };
     const blueInputCell = { border: allBorders, fill: { fgColor: { rgb: "99CCFF" } }, font: { name: "Calibri", sz: 18, bold: true }, alignment: { horizontal: "center", vertical: "center" } };
